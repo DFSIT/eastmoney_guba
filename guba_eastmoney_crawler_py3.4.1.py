@@ -102,8 +102,7 @@ def read_csv(path):
 
 def get_max_id(path):
     content_list=read_csv(path)
-    sort_content_by_idcode(content_list)
-    return int(content_list[-1][1]),datetime.datetime.strptime(content_list[-1][0][:10],'%Y-%m-%d').date()
+    return int(content_list[0][0]),datetime.datetime.strptime(content_list[0][1][:10],'%Y-%m-%d').date()
 
 def get_start_id_date(path,start_id):
     url='http://guba.eastmoney.com/news,0,%s.html'%start_id
@@ -122,14 +121,16 @@ def get_start_id_date(path,start_id):
     path_list.sort(key=lambda x:datetime.datetime.strptime(x,'%Y-%m-%d'))
     path_list.reverse()
     doc_count=len(path_list)
-
+    print(path_list)
     if doc_count==0:
         return start_id,return_datetime_date_html
+
     else:
         for path_second in path_list:
             try:
-                if os.path.getsize(path+path_second+'/'+path_second+'.csv'):
-                    hist_code,hist_datetime_date=get_max_id(path+path_second+'/'+path_second+'.csv')
+                if os.path.getsize(path+path_second+'/'+path_second+'_refer_info.csv'):
+                    hist_code,hist_datetime_date=get_max_id(path+path_second+'/'+path_second+'_refer_info.csv')
+                    print(hist_code)
                     if hist_code>start_id:
                         return hist_code,hist_datetime_date
                     else:
@@ -174,8 +175,10 @@ class Async_infi_Spider():
         self.log_saving_path_today=self.path+self.date_today_string+'/'+self.date_today_string+'_log.csv'
 
 
+
         self.sleep_flag=1
 
+        self.refer_info_saving_path=self.path+self.date_today_string+'/'+self.date_today_string+'_refer_info.csv'
 
 
 
@@ -277,6 +280,8 @@ class Async_infi_Spider():
                         self.content=self.save_content_tomorrow
                         self.save_content_tomorrow=[]
                         save_csv(self.csv_saving_path_today,self.save_content_today)
+                        sort_content_by_idcode(self.save_content_today)
+                        self.refer_info_next_start=[self.save_content_today[-1][1],self.save_content_today[-1][0]]
                         self.save_content_today=[]
                         print('数据存储完毕')
                         # '''数据整理'''
@@ -296,7 +301,7 @@ class Async_infi_Spider():
 
 
                     elif self.content[-1][0][:10]==self.date_today_string:
-
+                        self.refer_info_next_start=[self.content[-1][1],self.content[-1][0]]
                         save_csv(self.csv_saving_path_today,self.content)
                         self.content=[]
                         print('当天数据储存完毕')
@@ -319,6 +324,10 @@ class Async_infi_Spider():
                         print('调整并发速度 %s'%self.concurrency)
                 self.return_count=0
                 self.concurrency_temp_step=10
+                '''记录 本次爬行最大id 和 时间'''
+                with open(self.refer_info_saving_path,'w',encoding='utf-8',newline='') as f:
+                    spamwriter=csv.writer(f,delimiter='|')
+                    spamwriter.writerow(self.refer_info_next_start)
             t2=time.time()
             print('time cost %.2f'%(t2-t1))
             if t2-t1<60 and t2-t1>0 and self.sleep_flag==1:
@@ -339,6 +348,6 @@ def main(start_id,requests_amount,max_amount,requests_per_time):
     sever_spider=Async_infi_Spider(start_code,datetime_date,concurrency=requests_amount,max_concurrency=max_amount,num_per=requests_per_time)
     sever_spider._run()
 if __name__ == '__main__':
-    main(428327774,1000,4000,500)
+    main(428327780,1000,4000,500)
 
 
