@@ -102,7 +102,8 @@ def read_csv(path):
 
 def get_max_id(path):
     content_list=read_csv(path)
-    return int(content_list[0][0]),datetime.datetime.strptime(content_list[0][1][:10],'%Y-%m-%d').date()
+    content_list.sort(key=lambda x:x[0])
+    return int(content_list[-1][0]),datetime.datetime.strptime(content_list[-1][1][:10],'%Y-%m-%d').date()
 
 def get_start_id_date(path,start_id):
     url='http://guba.eastmoney.com/news,0,%s.html'%start_id
@@ -325,9 +326,7 @@ class Async_infi_Spider():
                 self.return_count=0
                 self.concurrency_temp_step=10
                 '''记录 本次爬行最大id 和 时间'''
-                with open(self.refer_info_saving_path,'w',encoding='utf-8',newline='') as f:
-                    spamwriter=csv.writer(f,delimiter='|')
-                    spamwriter.writerow(self.refer_info_next_start)
+                save_csv(self.refer_info_saving_path,[self.refer_info_next_start])
             t2=time.time()
             print('time cost %.2f'%(t2-t1))
             if t2-t1<60 and t2-t1>0 and self.sleep_flag==1:
