@@ -122,7 +122,6 @@ def get_start_id_date(path,start_id):
     path_list.sort(key=lambda x:datetime.datetime.strptime(x,'%Y-%m-%d'))
     path_list.reverse()
     doc_count=len(path_list)
-    print(path_list)
     if doc_count==0:
         return start_id,return_datetime_date_html
 
@@ -230,6 +229,7 @@ class Async_infi_Spider():
 
 
     def _run(self):
+
         while 1:
             t1=time.time()
             for i in sep(self.input_start_code,self.concurrency,self.num_per):
@@ -298,7 +298,7 @@ class Async_infi_Spider():
                         self.date_tomorrow_datetime=self.date_today_datetime+datetime.timedelta(days=1)
                         self.date_tomorrow_string=self.date_tomorrow_datetime.strftime('%Y-%m-%d')
                         self.csv_saving_path_today=self.path+self.date_today_string+'/'+self.date_today_string+'.csv'
-                        self.log_saving_path_today=self.path+self.date_today_string+'/'+self.date_today_string+'_log.txt'
+                        self.log_saving_path_today=self.path+self.date_today_string+'/'+self.date_today_string+'_log.csv'
 
 
                     elif self.content[-1][0][:10]==self.date_today_string:
